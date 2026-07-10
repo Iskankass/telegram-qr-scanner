@@ -18,13 +18,62 @@
             font-size: 18px;
             font-weight: bold;
             word-wrap: break-word;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none; /* Скрыта по умолчанию */
         }
     </style>
 </head>
 <body>
-    <h2>Сканер запущен</h2>
+    <h2>Сканер QR-кодов</h2>
     <p id="result">Ожидание QR-кода...</p>
+    
+    <button id="scanBtn" onclick="startScan()">Открыть сканер снова</button>
 
     <script>
         // Инициализация Telegram Web App
-        const tg
+        const tg = window.Telegram.WebApp;
+
+        // Сообщаем клиенту Telegram, что приложение готово
+        tg.ready();
+        
+        // Разворачиваем приложение на весь экран
+        tg.expand();
+
+        // Функция запуска нативного сканера Telegram
+        function startScan() {
+            tg.showScanQrPopup({
+                text: "Наведите камеру на QR-код" // Текст, который будет под рамкой сканера
+            }, function(qrText) {
+                // Этот код выполнится, когда QR-код будет успешно считан
+                document.getElementById('result').innerText = "Считанный код: " + qrText;
+                
+                // ВАЖНО: Если вы хотите сразу отправить данные боту и закрыть окно, раскомментируйте код ниже:
+                // tg.sendData(qrText); 
+                // tg.close();
+                
+                // Возвращаем true, чтобы окно сканера автоматически закрылось после считывания
+                return true; 
+            });
+        }
+
+        // Автоматический запуск камеры при открытии Web App
+        // Используем небольшую задержку (500 мс), чтобы Telegram успел полностью отрисовать интерфейс
+        setTimeout(() => {
+            startScan();
+            
+            // Показываем кнопку на случай, если пользователь нажмет "Отмена" в сканере
+            document.getElementById('scanBtn').style.display = 'inline-block';
+        }, 500);
+    </script>
+</body>
+</html>
